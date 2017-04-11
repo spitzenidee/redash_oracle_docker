@@ -1,39 +1,35 @@
 FROM redash/redash:latest
 MAINTAINER Michael Spitzer <professa@gmx.net>
 
-#######################################################################
-# DockerHub / GitHub:
-# https://github.com/spitzenidee/redash_oracle_docker
-# ...
-#######################################################################
+USER root
 
-# Define proxy ENVs (if needed)
-#ENV FTP_PROXY=http://http.proxy.net:8765
-#ENV HTTPS_PROXY=$FTP_PROXY
-#ENV HTTP_PROXY=$FTP_PROXY
-#ENV ftp_proxy=$FTP_PROXY
-#ENV http_proxy=$FTP_PROXY
-#ENV https_proxy=$FTP_PROXY
-
-# Install the Oracle client
-WORKDIR /oracle_client
-COPY instantclient.tgz .
-RUN tar xzvf instantclient.tgz
-
-ENV ORACLE_HOME=/oracle_client/instantclient
-WORKDIR $ORACLE_HOME
-RUN ln -s libclntsh.so.12.1 libclntsh.so
+# Oracle instantclient installation (ZIP archives need to be in the same directory as this Dockerfile)
+ENV ORACLE_HOME=/usr/local/instantclient
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ORACLE_HOME
 
-#######################################################################
-# Install the requirements for Oracle Instantclient / cx_oracle::
-RUN apt-get update && \
-    apt-get install -y \
-        build-essential \
-        curl \
-        libffi-dev \
-        libffi6\
-        libsasl2-2 \
-        libsasl2-dev
-RUN pip install \
-        cx_oracle
+COPY instantclient-basic-linux.x64-12.2.0.1.0.zip /tmp/
+COPY instantclient-jdbc-linux.x64-12.2.0.1.0.zip /tmp/
+COPY instantclient-odbc-linux.x64-12.2.0.1.0.zip /tmp/
+COPY instantclient-sdk-linux.x64-12.2.0.1.0.zip /tmp/
+COPY instantclient-sqlplus-linux.x64-12.2.0.1.0.zip /tmp/
+
+RUN apt-get update  -y && \
+    apt-get install -y unzip libaio-dev
+
+RUN unzip /tmp/instantclient-basic-linux.x64-12.2.0.1.0.zip -d /usr/local/ && \
+    unzip /tmp/instantclient-jdbc-linux.x64-12.2.0.1.0.zip -d /usr/local/ && \
+    unzip /tmp/instantclient-odbc-linux.x64-12.2.0.1.0.zip -d /usr/local/ && \
+    unzip /tmp/instantclient-sdk-linux.x64-12.2.0.1.0.zip -d /usr/local/ && \
+    unzip /tmp/instantclient-sqlplus-linux.x64-12.2.0.1.0.zip -d /usr/local/ && \
+    ln -s /usr/local/instantclient_12_2 /usr/local/instantclient && \
+    ln -s /usr/local/instantclient/libclntsh.so.12.1 /usr/local/instantclient/libclntsh.so && \
+    ln -s /usr/local/instantclient/sqlplus /usr/bin/sqlplus
+
+RUN apt-get clean -y && \
+    rm /tmp/instantclient-* && \
+    pip install cx_Oracle==5.2
+
+#Add REDASH ENV to add Oracle Query Runner
+ENV REDASH_ADDITIONAL_QUERY_RUNNERS=redash.query_runner.oracle,redash.query_runner.python
+
+USER redash
