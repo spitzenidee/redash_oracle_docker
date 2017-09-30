@@ -12,7 +12,7 @@ ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ORACLE_HOME
 
 COPY instantclient-basic-linux.x64-12.2.0.1.0.zip /tmp/
 COPY instantclient-jdbc-linux.x64-12.2.0.1.0.zip /tmp/
-COPY instantclient-odbc-linux.x64-12.2.0.1.0.zip /tmp/
+COPY instantclient-odbc-linux.x64-12.2.0.1.0-2.zip /tmp/
 COPY instantclient-sdk-linux.x64-12.2.0.1.0.zip /tmp/
 COPY instantclient-sqlplus-linux.x64-12.2.0.1.0.zip /tmp/
 
