@@ -3,7 +3,10 @@ MAINTAINER Michael Spitzer <professa@gmx.net>
 
 USER root
 
-# Oracle instantclient installation (ZIP archives need to be in the same directory as this Dockerfile)
+# Oracle instantclient installation (ZIP archives need to be in the same directory as this Dockerfile).
+# Download from:
+# http://www.oracle.com/technetwork/topics/linuxx86-64soft-092277.html
+# or: http://www.oracle.com/technetwork/database/features/instant-client/index-097480.html
 ENV ORACLE_HOME=/usr/local/instantclient
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ORACLE_HOME
 
