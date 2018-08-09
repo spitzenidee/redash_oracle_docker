@@ -1,17 +1,13 @@
-# Michael Spitzer, professa@gmx.net:
-# This docker compose definition was directly taken from "https://github.com/getredash/redash"
-# and is a rip-off of the "docker-compose.production.yml" file. The only change the use of
-# "redash_oracle_docker:latest" instead of "redash:latest" for both server and worker.
-#
-# This is an example configuration for Docker Compose. Make sure to at least update
+# This is an example configuration for Docker Compose. Make sure to atleast update
 # the cookie secret & postgres database password.
+#
 # Some other recommendations:
 # 1. To persist Postgres data, assign it a volume host location.
 # 2. Split the worker service to adhoc workers and scheduled queries workers.
 version: '2'
 services:
   server:
-    image: redash_oracle_msp:latest
+    image: redash_oracle:5.0.0-beta.b4476
     command: server
     depends_on:
       - postgres
@@ -24,8 +20,10 @@ services:
       REDASH_REDIS_URL: "redis://redis:6379/0"
       REDASH_DATABASE_URL: "postgresql://postgres@postgres/postgres"
       REDASH_COOKIE_SECRET: veryverysecret
+      REDASH_WEB_WORKERS: 4
+    restart: always
   worker:
-    image: redash_oracle_docker:latest
+    image: redash_oracle:5.0.0-beta.b4476
     command: scheduler
     environment:
       PYTHONUNBUFFERED: 0
@@ -34,12 +32,15 @@ services:
       REDASH_DATABASE_URL: "postgresql://postgres@postgres/postgres"
       QUEUES: "queries,scheduled_queries,celery"
       WORKERS_COUNT: 2
+    restart: always
   redis:
     image: redis:3.0-alpine
+    restart: always
   postgres:
     image: postgres:9.5.6-alpine
     # volumes:
     #   - /opt/postgres-data:/var/lib/postgresql/data
+    restart: always
   nginx:
     image: redash/nginx:latest
     ports:
@@ -48,3 +49,4 @@ services:
       - server
     links:
       - server:redash
+    restart: always
