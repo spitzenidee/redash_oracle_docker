@@ -1,4 +1,4 @@
-FROM redash/redash:latest
+FROM redash/redash:5.0.0-beta.b4476
 MAINTAINER Michael Spitzer <professa@gmx.net>
 
 USER root
@@ -27,16 +27,16 @@ RUN apt-get update  -y && \
     ln -s /usr/local/instantclient_12_2 /usr/local/instantclient && \
     ln -s /usr/local/instantclient/libclntsh.so.12.1 /usr/local/instantclient/libclntsh.so && \
     ln -s /usr/local/instantclient/sqlplus /usr/bin/sqlplus && \
-    # install cx_Oracle via pip:
-    pip install cx_Oracle==5.2 && \
     # clean up:
     apt-get clean -y && \
     apt-get autoclean && \
     apt-get autoremove --purge && \
     rm /tmp/instantclient-* && \
+    pip install cx_Oracle==5.2 && \
     # increase timeout of gunicorn query runners from 30s to 120s (in the "server" section of /app/bin/docker-entrypoint):
     sed -r 's/5000 --name/5000 --timeout 120 --name/' </app/bin/docker-entrypoint >/app/bin/docker-entrypoint_timeout && \
-    mv /app/bin/docker-entrypoint_timeout /app/bin/docker-entrypoint
+    mv /app/bin/docker-entrypoint_timeout /app/bin/docker-entrypoint && \
+    chmod a+rx /app/bin/docker-entrypoint
 
 #Add REDASH ENV to add Oracle Query Runner
 ENV REDASH_ADDITIONAL_QUERY_RUNNERS=redash.query_runner.oracle,redash.query_runner.python
